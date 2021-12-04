@@ -1,0 +1,51 @@
+layout: post
+title: UART Communication Protocol
+date: '2021-12-03 10:00'
+excerpt: What is hidden behind the UART Protocol.
+comments: true
+---
+
+## UART defined
+
+UART stands for Universal Asynchronous Receiver/Transmitter. It is a serial communication protocol, just like the well known USB (universal serial bus), Ethernet, SPI, I2C and many others. It is also asynchronous, meaning that there is no single source of the clock signals to be shared between the communicating peripheral. UART peripheral relies on its own internal clock which is used to mark the start and end bit of the data word, but in order to achive synchronization with senders/receivers there has to be a concensus of the clock beat, also known as baud rate. 
+
+There is a synchronous version of UART, and it is called (not supprisingly) Universal Synchronous/Asynchronous Receiver/Transmitter or USART. USART needs a line for the external clock beat that will be shared accross the devices. The extra clock line makes the start and end bit obsolete which leads to this type of communication being more efficient / faster than asynchronous. There are also other differences between the two variants, but we'll come to that later.
+
+## UART intricacies
+
+In order to use UART we need to configure it at least with these options:
+  - Baud rate
+  - Specify the data frames with these options: Parity, Start / End bits for synchronization, length of the word
+
+### Baud rate
+
+Baud rate, or bits-per-second is usually specified in any of these commonly used values: 1200, 2400, 4800, 9600, 19200, 38400, 57600, and 115200 bps, but we are free to use any other value, as long as we use it for both devices. The limit is 115200 after which transfer becomes unreliabled. 
+
+### Data frame
+As with any other protocol, we need to specify the data frame (packet that is sent from one end) and here each frame consists of these items hich have to be agreed upon both devices:
+- Synchronization bits (Start and end bits)
+- Data bits
+- Parity bits
+- Endianess (is the Least Significant Byte sent first - Little Endianess or the Most Significant Byte sent first - Big Endianess)
+
+Synchronization bits accompany each data chunk in asynchronous model - the start bit is always one bit, but end bit can be 1 or 2 bits. The IDLE state is always HIGH(1) and start bit transitions the idle state to 0 in order to send data bits. Stop bit returns the line to the IDLE state.
+
+Parity is a simple error-checking mechanism, that checks whethe the received data chunk is even or odd, and can be used in noisy channels together with some error handling
+
+## Data lines
+
+UART uses 2 data lines: Tx and Rx, Tx of one device connected to the Rx line of tthe other device. Each UART peripheral is connected on one side to a parallel data bus that takes in the parallel communication from CPU and converts that prallel bits to serial flo via its Rx and Tx lines
+
+## UART with DMA 
+In these series we will also explore high speed data communication is possible by using the DMA. 
+
+### No masters and slaves
+
+There is no concept of multiple masters and slaves in UART, it is designed with only two devices in mind. If we try to connect multiple masters to the same UART peripheral, we will encounter a bus contention situation.
+
+
+# UART in STM32 and HAL
+
+It is very convenient to use `HAL library` as it comes with some initialization and ready made library function. [Link](https://www.tensorflow.org/performance/performance_guide#utilize_queues_for_reading_data) to the Github repo.
+
+
